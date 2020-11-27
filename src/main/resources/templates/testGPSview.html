@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>定位管理监控测试</title>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css">
+    <script src="../../static/layui/lay/modules/element.js"></script>
+    <script src="/layui/layui.js"></script>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="/layui/lay/modules/element.js"></script>
+    <script src="/layui/layui.js"></script>
+    <script src="/js/jquery-3.5.0.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">定位管理监控测试</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="/adminview">控制台</a></li>
+            <li class="layui-nav-item"><a href="javascript:;">药品管理</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/medicinelist">全部药品</a></dd>
+                    <dd><a href="">急救药</a></dd>
+                    <dd><a href="">常用药</a></dd>
+                    <dd><a href="">管控药</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="javascript:;">老人信息</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/oldList">老人信息</a></dd>
+                    <dd><a href="/conditionlist">健康信息</a></dd>
+                    <dd><a href="">亲属信息</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    小吴
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                    <dd><a href="">安全设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="/login">退出</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+
+                <li class="layui-nav-item">
+                    <a href="javascript:;">日常照料</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;">日常就餐</a></dd>
+                        <dd><a href="javascript:;">健康查体</a></dd>
+                        <dd><a href="">超链接</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">急救方案</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;">中风急救</a></dd>
+                        <dd><a href="javascript:;">脑溢血急救</a></dd>
+                        <dd><a href="">超链接</a></dd>
+                    </dl>
+                </li>
+
+                <li class="layui-nav-item"><a href="">云市场</a></li>
+                <li class="layui-nav-item"><a href="">发布商品</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" id="container">
+        <!-- 加载地图JSAPI脚本 -->
+        <script src="https://webapi.amap.com/maps?v=1.4.15&key=您申请的key值"></script>
+        <script type="text/javascript">
+
+            // 加载地图
+            var map = new AMap.Map('container', {
+                resizeEnable: true, //是否监控地图容器尺寸变化
+                zoom: 16, //初始化地图层级,数字越大现实的位置越精确
+                center: [117.037781,36.223041] //初始化地图中心点
+            });
+
+            //设置地图比例尺，在左上角显示
+            map.plugin(["AMap.ToolBar"], function () {
+                map.addControl(new AMap.ToolBar());
+            });
+
+            // 设置文本标记，用于显示定位点
+            var marker = new AMap.Marker({
+                position: map.getCenter(),
+                icon: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
+                offset: new AMap.Pixel(-13, -30)//设置偏移量
+            });
+
+            // 添加窗口显示信息
+            var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
+
+            //添加多个标记点，模仿多个老人定位
+            var markers = [];
+            var positions = [
+                [117.037781,36.223041],
+                [117.037137,36.221899],
+                [117.036869,36.222236],
+                [117.038554,36.222132],
+                [117.038264,36.222435]
+            ];
+
+            for (var i = 0, marker; i < positions.length; i++) {
+                marker = new AMap.Marker({
+                    map: map,
+                    icon: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-' + (i + 1) + '.png',
+                    position: positions[i]
+                });
+                markers.push(marker);
+            }
+
+            window.onload = function () {
+                getDangerous();
+            }
+            //利用ajax定时发送异步数据检测，是否出现危险信号
+            function getDangerous() {
+
+                setTimeout(getDangerous,100*1000)               //定时器，定时发送请求,10s发送一次请求
+                $.ajax({
+                    url:"getDangerous",
+                    type:"post",
+                    dataType:"json",
+                    success:function (data) {
+                        if(data.dangerous = 1){
+                            var i = data.id;
+                            //传递参数进来，显示出现危险的老人信息
+                            markers[i].setMap(null);
+                            var marker = new AMap.Marker({
+                                map: map,
+                                icon: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
+                                position: positions[i]
+                            });
+                            markers.push(marker);
+                            marker.content = '我是:'+data.name +'；'+ '我现在的位置是:'+data.xlocation+','+data.ylocation+(i + 1);
+                            marker.on('click', markerClick);
+                            marker.emit('click', {target: marker});
+                            marker.setAnimation('AMAP_ANIMATION_BOUNCE');
+                            // }
+                            function markerClick(e) {
+                                infoWindow.setContent(e.target.content);
+                                infoWindow.open(map, e.target.getPosition());
+                            }
+                        }
+                    }
+
+                })
+
+            }
+            map.setFitView();
+        </script>
+
+
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © layui.com - 底部固定区域
+    </div>
+</div>
+<script src="../src/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+
+    });
+</script>
+</body>
+</html>
