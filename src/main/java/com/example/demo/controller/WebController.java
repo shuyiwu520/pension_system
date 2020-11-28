@@ -25,12 +25,6 @@ public class WebController {
     }
 
 
-    @RequestMapping("/adminviewTest")
-    public String testGPSview() {
-        return "view/adminviewTest";
-    }
-
-
     //    首页
     @RequestMapping("/index")
     public String index() {
